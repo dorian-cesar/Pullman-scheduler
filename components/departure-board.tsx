@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Bus, Cloud, CloudRain, CloudSun, Sun, Clock } from "lucide-react";
+import { sitio } from "../info.json";
 
 interface Departure {
   id: string;
@@ -140,13 +141,12 @@ export function DepartureBoard() {
 
   useEffect(() => {
     let frameId: number;
+    let startScrollingTimeout: NodeJS.Timeout;
 
     const scrollStep = () => {
       if (scrollRef.current) {
-        // avanzamos 1px
         scrollRef.current.scrollTop += 1;
 
-        // Cuando supera la primera lista, reseteamos suavemente
         if (scrollRef.current.scrollTop >= totalHeight) {
           scrollRef.current.scrollTop = 0;
         }
@@ -154,8 +154,15 @@ export function DepartureBoard() {
       frameId = requestAnimationFrame(scrollStep);
     };
 
-    frameId = requestAnimationFrame(scrollStep);
-    return () => cancelAnimationFrame(frameId);
+    // Esperar 5 segundos antes de iniciar el scroll automático
+    startScrollingTimeout = setTimeout(() => {
+      frameId = requestAnimationFrame(scrollStep);
+    }, 5000);
+
+    return () => {
+      clearTimeout(startScrollingTimeout);
+      cancelAnimationFrame(frameId);
+    };
   }, [totalHeight]);
 
   return (
@@ -171,19 +178,19 @@ export function DepartureBoard() {
             />
             <div className="h-8 w-px bg-white/20" />
             <h1 className="text-2xl font-bold text-white tracking-wider uppercase font-mono">
-              Terminal Santiago
+              {sitio}
             </h1>
           </div>
           <div className="flex items-center gap-4 text-white">
-            <Clock className="h-10 w-10 text-accent" />
-            <div className="text-right">
-              <div className="text-4xl font-bold font-mono tracking-wider tabular-nums">
+            <Clock className="h-6 w-6 text-white" />
+            <div className="flex items-baseline gap-3">
+              <div className="text-4xl font-bold font-mono tracking-wider tabular-nums text-white">
                 {currentTime.toLocaleTimeString("es-CL", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
               </div>
-              <div className="text-sm opacity-70 uppercase tracking-wide mt-1">
+              <div className="text-lg opacity-90 uppercase tracking-wide">
                 {currentTime.toLocaleDateString("es-CL", {
                   day: "2-digit",
                   month: "short",
