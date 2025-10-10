@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Bus, Clock, Sun, Cloud, CloudRain, CloudSun } from "lucide-react";
+import useFadeIn from "@/hooks/useFadeIn";
 import info from "../info.json";
 
 function WeatherIcon({ weather }) {
@@ -25,6 +26,7 @@ export default function DepartureBoard({ departures: initialDepartures = [] }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const scrollRef = useRef(null);
   const rowHeight = 85;
+  const isVisible = useFadeIn();
 
   // Reloj
   useEffect(() => {
@@ -66,7 +68,11 @@ export default function DepartureBoard({ departures: initialDepartures = [] }) {
   }, [departures]);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-[#0a1628] via-[#0d1d35] to-[#0a1628] p-8 flex flex-col overflow-hidden">
+    <div
+      className={`h-screen transition-opacity duration-700 ${
+        isVisible ? "opacity-100 animate-fade-in" : "opacity-0"
+      } bg-black bg-gradient-to-br from-[#0a1628] via-[#0d1d35] to-[#0a1628] p-8 flex flex-col overflow-hidden`}
+    >
       {/* Header */}
       <header className="mb-4 animate-fade-in flex-shrink-0">
         <div className="flex items-center justify-between bg-[#1a2942] border-4 border-[#2a3952] rounded-lg p-3 shadow-2xl">
