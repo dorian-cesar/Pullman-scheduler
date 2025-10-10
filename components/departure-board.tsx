@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Bus, Cloud, CloudRain, CloudSun, Sun, Clock } from "lucide-react";
-import { sitio } from "../info.json";
+import info from "../info.json";
 
 interface Departure {
   id: string;
@@ -127,8 +127,7 @@ export function DepartureBoard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const rowHeight = 88;
-  const itemsPerPage = 8;
+  const rowHeight = 85;
 
   // Duplicamos la lista para hacer scroll infinito
   const displayList = [...departures, ...departures];
@@ -172,13 +171,13 @@ export function DepartureBoard() {
         <div className="flex items-center justify-between bg-[#1a2942] border-4 border-[#2a3952] rounded-lg p-3 shadow-2xl">
           <div className="flex items-center gap-3">
             <img
-              src="/images/design-mode/logo-pullmanbus-new.webp"
+              src="/img/logos/logo-pullman-nuevo-blanco.svg"
               alt="Pullman Bus"
-              className="h-8 w-auto brightness-110"
+              className="h-8 w-auto brightness-110 pl-2"
             />
             <div className="h-8 w-px bg-white/20" />
-            <h1 className="text-2xl font-bold text-white tracking-wider uppercase font-mono">
-              {sitio}
+            <h1 className="text-2xl font-bold text-white tracking-wider uppercase font-mono pt-1">
+              {info.sitio}
             </h1>
           </div>
           <div className="flex items-center gap-4 text-white">
@@ -242,16 +241,16 @@ export function DepartureBoard() {
                   className="grid grid-cols-12 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
                   style={{ height: `${rowHeight}px` }}
                 >
-                  <div className="col-span-4 text-white text-3xl font-bold font-mono tracking-wider uppercase">
+                  <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
                     {departure.destination}
                   </div>
                   <div className="col-span-1 flex items-center justify-center">
                     <WeatherIcon weather={departure.weather} />
                   </div>
-                  <div className="col-span-2 text-white text-4xl font-bold font-mono tracking-widest">
+                  <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-widest">
                     {departure.time}
                   </div>
-                  <div className="col-span-2 text-white/80 text-xl font-mono tracking-wide uppercase">
+                  <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
                     {departure.service}
                   </div>
                   <div className="col-span-3">

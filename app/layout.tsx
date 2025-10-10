@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Tablero Buses - Pullman Costa",
   description:
     "Tablero de buses de Pullman Costa para muestra en pantallas de terminal",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
