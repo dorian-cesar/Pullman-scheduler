@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import DepartureBoard from "@/components/departure-board";
-import { AdvertisingView } from "@/components/advertising-view";
+import AdvertisingView from "@/components/advertising-view";
 
 export default function Home() {
   const [showAdvertising, setShowAdvertising] = useState(true);

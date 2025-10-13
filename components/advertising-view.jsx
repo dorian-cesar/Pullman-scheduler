@@ -2,51 +2,35 @@
 
 import { useState, useEffect } from "react";
 
-const advertisements = [
-  {
-    id: 1,
-    type: "image" as const,
-    content: "/beautiful-beach-destination-vi-a-del-mar-chile.jpg",
-    title: "Descubre Viña del Mar",
-    description: "El destino perfecto para tus vacaciones",
-  },
-  {
-    id: 2,
-    type: "image" as const,
-    content: "/modern-comfortable-bus-interior-premium-seats.jpg",
-    title: "Viaja con Comodidad",
-    description: "Buses Premium con asientos reclinables",
-  },
-  {
-    id: 3,
-    type: "image" as const,
-    content: "/chilean-coastal-city-sunset-la-serena.jpg",
-    title: "La Serena te espera",
-    description: "Playas hermosas y atardeceres inolvidables",
-  },
-];
-
-export function AdvertisingView() {
+export default function AdvertisingView() {
+  const [advertisements, setAdvertisements] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const currentAd = advertisements[currentIndex];
+  useEffect(() => {
+    fetch("/api/advertisements")
+      .then((res) => res.json())
+      .then((data) => setAdvertisements(data))
+      .catch(() => setAdvertisements([]));
+  }, []);
 
   useEffect(() => {
+    if (advertisements.length === 0) return;
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % advertisements.length);
         setIsTransitioning(false);
-      }, 300); // transición suave
+      }, 300);
     }, 5000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [advertisements]);
+
+  const currentAd = advertisements[currentIndex];
+  if (!currentAd) return null;
 
   return (
     <div className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden">
-      {/* Logo blanco con sombra negra */}
       <div className="absolute top-8 left-8 z-20 animate-fade-in">
         <img
           src="/img/logos/logo-pullman-nuevo-blanco.svg"
@@ -55,7 +39,6 @@ export function AdvertisingView() {
         />
       </div>
 
-      {/* Imagen / Video */}
       <div
         className={`relative w-full h-screen transition-opacity duration-500 ${
           isTransitioning ? "opacity-0" : "opacity-100"
@@ -82,18 +65,16 @@ export function AdvertisingView() {
           </video>
         )}
 
-        {/* Texto con sombra negra */}
         <div className="absolute bottom-0 left-0 right-0 p-12 text-white animate-slide-up-fade-in">
-          <h2 className="text-6xl font-bold mb-4 text-balance drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">
+          <h2 className="text-6xl font-bold mb-4 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">
             {currentAd.title}
           </h2>
-          <p className="text-3xl text-white/90 text-balance drop-shadow-[1px_1px_3px_rgba(0,0,0,0.7)]">
+          <p className="text-3xl text-white/90 drop-shadow-[1px_1px_3px_rgba(0,0,0,0.7)]">
             {currentAd.description}
           </p>
         </div>
       </div>
 
-      {/* Barra de progreso */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
         <div
           className="h-full bg-accent shadow-lg shadow-accent/50 transition-all duration-500 ease-out"
