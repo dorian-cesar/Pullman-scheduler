@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -10,6 +11,7 @@ export default function AdminPage() {
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const showToast = (message, icon = "info") => {
     Swal.fire({
@@ -79,7 +81,10 @@ export default function AdminPage() {
         setAds((prev) =>
           prev.map((a) => (a.id === adId ? { ...a, content: json.file } : a))
         );
-        showToast(`Imagen del anuncio ${adId} reemplazada`, "success");
+        showToast(
+          `Imagen del anuncio ${adId} reemplazada correctamente`,
+          "success"
+        );
       } else {
         showToast(json.error || "Error al subir imagen", "error");
       }
@@ -124,19 +129,49 @@ export default function AdminPage() {
       <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-sm">
           <h2 className="text-2xl mb-4">Login Administrador</h2>
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="p-2 rounded bg-gray-700 mb-4 w-full"
-          />
-          <button
-            onClick={handleLogin}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full"
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+            className="flex flex-col gap-4"
           >
-            Entrar
-          </button>
+            <input
+              type="text"
+              name="username"
+              autoComplete="username"
+              value="admin"
+              readOnly
+              className="hidden"
+            />
+
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="p-2 rounded bg-gray-700 w-full pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-300 hover:text-white"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full"
+            >
+              Entrar
+            </button>
+          </form>
         </div>
       </div>
     );
