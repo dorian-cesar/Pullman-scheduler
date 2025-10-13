@@ -14,15 +14,14 @@ const JSON_PUBLIC_ID = "mantenedor/advertisements.json";
 // GET: Leer JSON
 export async function GET() {
   try {
-    // URL directa al JSON raw + timestamp para evitar cache
-    const cloudinaryJsonUrl = `https://res.cloudinary.com/${
-      process.env.CLOUDINARY_CLOUD_NAME
-    }/raw/upload/${JSON_PUBLIC_ID}?t=${Date.now()}`;
+    const result = await cloudinary.api.resource(JSON_PUBLIC_ID, {
+      resource_type: "raw",
+    });
 
-    const res = await fetch(cloudinaryJsonUrl);
-    if (!res.ok) throw new Error("No se pudo cargar JSON");
-
+    // result.secure_url tiene la versión más reciente
+    const res = await fetch(result.secure_url);
     const data = await res.json();
+
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error cargando JSON:", error);

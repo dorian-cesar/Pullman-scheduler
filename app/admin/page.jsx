@@ -32,27 +32,30 @@ export default function AdminPage() {
     }
   };
 
-  // CARGAR ADS DESDE CLOUDINARY
+  // CARGAR ADS
   useEffect(() => {
-    if (loggedIn) {
-      const fetchAds = async () => {
-        try {
-          setLoadingMessage("Cargando anuncios…");
-          setLoading(true);
-          const res = await fetch("/api/get-json");
-          const data = await res.json();
-          if (Array.isArray(data)) setAds(data);
-          else setAds([]);
-        } catch {
-          setAds([]);
-          showToast("No se pudieron cargar los anuncios", "error");
-        } finally {
-          setLoading(false);
-          setLoadingMessage("");
-        }
-      };
-      fetchAds();
-    }
+    if (!loggedIn) return;
+
+    const fetchAds = async () => {
+      try {
+        setLoadingMessage("Cargando anuncios…");
+        setLoading(true);
+
+        const res = await fetch("/api/advertisements", { cache: "no-store" });
+        const data = await res.json();
+
+        if (Array.isArray(data)) setAds(data);
+        else setAds([]);
+      } catch {
+        setAds([]);
+        showToast("No se pudieron cargar los anuncios", "error");
+      } finally {
+        setLoading(false);
+        setLoadingMessage("");
+      }
+    };
+
+    fetchAds();
   }, [loggedIn]);
 
   // SUBIR IMAGEN
@@ -89,30 +92,6 @@ export default function AdminPage() {
     }
   };
 
-  // CARGAR ADS
-  useEffect(() => {
-    if (loggedIn) {
-      const fetchAds = async () => {
-        try {
-          setLoadingMessage("Cargando anuncios…");
-          setLoading(true);
-
-          const res = await fetch("/api/advertisements");
-          const data = await res.json();
-          if (Array.isArray(data)) setAds(data);
-          else setAds([]);
-        } catch {
-          setAds([]);
-          showToast("No se pudieron cargar los anuncios", "error");
-        } finally {
-          setLoading(false);
-          setLoadingMessage("");
-        }
-      };
-      fetchAds();
-    }
-  }, [loggedIn]);
-
   // GUARDAR ADS
   const handleSave = async () => {
     try {
@@ -127,7 +106,7 @@ export default function AdminPage() {
 
       const json = await res.json();
       if (res.ok) {
-        showToast("Datos de anuncios guardados", "success");
+        showToast("Datos de anuncios guardados correctamente", "success");
         console.log("URL JSON:", json.url);
       } else {
         showToast(json.error || "Error guardando datos de anuncios", "error");

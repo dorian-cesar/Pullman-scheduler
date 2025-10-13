@@ -8,7 +8,7 @@ export default function AdvertisingView() {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    fetch("/api/advertisements")
+    fetch("/api/advertisements", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => setAdvertisements(data))
       .catch(() => setAdvertisements([]));
