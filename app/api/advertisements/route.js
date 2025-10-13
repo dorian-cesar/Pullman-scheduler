@@ -9,42 +9,43 @@ cloudinary.config({
 
 export const runtime = "nodejs";
 
-// URL de tu JSON raw en Cloudinary
-const jsonPublicId = "mantenedor/advertisements";
+const JSON_PUBLIC_ID = "mantenedor/advertisements.json";
 
+// GET: Leer JSON
 export async function GET() {
   try {
-    // Obtener la URL del raw file
-    const url = cloudinary.url(jsonPublicId, { resource_type: "raw" });
+    // URL directa al JSON raw + timestamp para evitar cache
+    const cloudinaryJsonUrl = `https://res.cloudinary.com/${
+      process.env.CLOUDINARY_CLOUD_NAME
+    }/raw/upload/${JSON_PUBLIC_ID}?t=${Date.now()}`;
 
-    // Traer contenido del JSON
-    const res = await fetch(url);
+    const res = await fetch(cloudinaryJsonUrl);
+    if (!res.ok) throw new Error("No se pudo cargar JSON");
+
     const data = await res.json();
-
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error al leer JSON:", error);
+    console.error("Error cargando JSON:", error);
     return NextResponse.json(
-      { error: "No se pudo leer JSON" },
+      { error: "No se pudo cargar JSON" },
       { status: 500 }
     );
   }
 }
 
+// PUT: Sobreescribir JSON
 export async function PUT(req) {
   try {
-    const body = await req.json();
+    const data = await req.json();
+    const jsonString = JSON.stringify(data, null, 2);
 
-    // Convertir JSON a buffer
-    const buffer = Buffer.from(JSON.stringify(body));
-
-    // Subir de nuevo a Cloudinary
-    await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+    const uploaded = await new Promise((resolve, reject) => {
+      const buffer = Buffer.from(jsonString, "utf-8");
+      const stream = cloudinary.uploader.upload_stream(
         {
-          resource_type: "raw",
           folder: "mantenedor",
-          public_id: "advertisements",
+          public_id: "advertisements.json",
+          resource_type: "raw",
           overwrite: true,
         },
         (error, result) => {
@@ -52,12 +53,15 @@ export async function PUT(req) {
           else resolve(result);
         }
       );
-      uploadStream.end(buffer);
+      stream.end(buffer);
     });
 
-    return NextResponse.json({ message: "JSON actualizado correctamente" });
+    return NextResponse.json({
+      message: "JSON actualizado correctamente",
+      url: uploaded.secure_url, // URL del JSON actualizado
+    });
   } catch (error) {
-    console.error("Error al actualizar JSON:", error);
+    console.error("Error guardando JSON:", error);
     return NextResponse.json(
       { error: "No se pudo actualizar JSON" },
       { status: 500 }

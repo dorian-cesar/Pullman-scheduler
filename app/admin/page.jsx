@@ -1,31 +1,57 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [ads, setAds] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
+  const showToast = (message, icon = "info") => {
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon,
+      title: message,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+  };
 
   // LOGIN
   const handleLogin = () => {
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASS) {
       setLoggedIn(true);
     } else {
-      alert("Contraseña incorrecta");
+      showToast("Contraseña incorrecta", "error");
     }
   };
 
   // CARGAR ADS DESDE CLOUDINARY
   useEffect(() => {
     if (loggedIn) {
-      fetch("/api/get-json")
-        .then((r) => r.json())
-        .then((data) => {
+      const fetchAds = async () => {
+        try {
+          setLoadingMessage("Cargando anuncios…");
+          setLoading(true);
+          const res = await fetch("/api/get-json");
+          const data = await res.json();
           if (Array.isArray(data)) setAds(data);
           else setAds([]);
-        })
-        .catch(() => setAds([]));
+        } catch {
+          setAds([]);
+          showToast("No se pudieron cargar los anuncios", "error");
+        } finally {
+          setLoading(false);
+          setLoadingMessage("");
+        }
+      };
+      fetchAds();
     }
   }, [loggedIn]);
 
@@ -39,6 +65,8 @@ export default function AdminPage() {
     formData.append("adId", adId.toString());
 
     try {
+      setLoadingMessage(`Subiendo imagen del anuncio ${adId}…`);
+      setLoading(true);
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -48,34 +76,67 @@ export default function AdminPage() {
         setAds((prev) =>
           prev.map((a) => (a.id === adId ? { ...a, content: json.file } : a))
         );
-        alert(`Imagen del anuncio ${adId} reemplazada`);
+        showToast(`Imagen del anuncio ${adId} reemplazada`, "success");
       } else {
-        alert(json.error || "Error al subir imagen");
+        showToast(json.error || "Error al subir imagen", "error");
       }
     } catch {
-      alert("Error al subir imagen");
+      showToast("Error al subir imagen", "error");
     } finally {
+      setLoading(false);
+      setLoadingMessage("");
       e.target.value = "";
     }
   };
 
-  // GUARDAR JSON EN CLOUDINARY
+  // CARGAR ADS
+  useEffect(() => {
+    if (loggedIn) {
+      const fetchAds = async () => {
+        try {
+          setLoadingMessage("Cargando anuncios…");
+          setLoading(true);
+
+          const res = await fetch("/api/advertisements");
+          const data = await res.json();
+          if (Array.isArray(data)) setAds(data);
+          else setAds([]);
+        } catch {
+          setAds([]);
+          showToast("No se pudieron cargar los anuncios", "error");
+        } finally {
+          setLoading(false);
+          setLoadingMessage("");
+        }
+      };
+      fetchAds();
+    }
+  }, [loggedIn]);
+
+  // GUARDAR ADS
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/save-json", {
+      setLoadingMessage("Guardando datos de anuncios…");
+      setLoading(true);
+
+      const res = await fetch("/api/advertisements", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ads),
       });
+
       const json = await res.json();
       if (res.ok) {
-        alert("JSON guardado en Cloudinary");
+        showToast("Datos de anuncios guardados", "success");
         console.log("URL JSON:", json.url);
       } else {
-        alert(json.error || "Error guardando JSON");
+        showToast(json.error || "Error guardando datos de anuncios", "error");
       }
     } catch {
-      alert("Error guardando JSON");
+      showToast("Error guardando datos de anuncios", "error");
+    } finally {
+      setLoading(false);
+      setLoadingMessage("");
     }
   };
 
@@ -103,8 +164,18 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-6">Mantenedor de Publicidad</h1>
+    <div className="relative p-8 bg-gray-900 min-h-screen text-white">
+      {/* OVERLAY SPINNER CON MENSAJE */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/60 flex flex-col items-center justify-center z-50">
+          <div className="w-16 h-16 border-4 border-t-blue-600 border-white rounded-full animate-spin mb-4" />
+          <p className="text-white text-lg font-semibold">{loadingMessage}</p>
+        </div>
+      )}
+
+      <h1 className="text-3xl font-bold mb-6">
+        Mantenedor de Publicidad - Tablero Pullman
+      </h1>
 
       {ads.map((ad) => (
         <div key={ad.id} className="bg-gray-800 p-4 mb-6 rounded-lg">
@@ -129,8 +200,16 @@ export default function AdminPage() {
             )}
           </div>
 
+          {/* INPUT TÍTULO */}
+          <label
+            className="block mb-1 font-semibold text-white"
+            htmlFor={`title-${ad.id}`}
+          >
+            Título
+          </label>
           <input
-            className="p-2 rounded bg-gray-700 mb-2 w-full"
+            id={`title-${ad.id}`}
+            className="p-2 rounded bg-gray-700 mb-4 w-full"
             value={ad.title}
             onChange={(e) =>
               setAds((prev) =>
@@ -139,10 +218,19 @@ export default function AdminPage() {
                 )
               )
             }
-            placeholder="Título"
+            placeholder="Escribe el título del anuncio"
           />
+
+          {/* INPUT DESCRIPCIÓN */}
+          <label
+            className="block mb-1 font-semibold text-white"
+            htmlFor={`description-${ad.id}`}
+          >
+            Descripción
+          </label>
           <input
-            className="p-2 rounded bg-gray-700 mb-2 w-full"
+            id={`description-${ad.id}`}
+            className="p-2 rounded bg-gray-700 mb-4 w-full"
             value={ad.description}
             onChange={(e) =>
               setAds((prev) =>
@@ -151,11 +239,18 @@ export default function AdminPage() {
                 )
               )
             }
-            placeholder="Descripción"
+            placeholder="Escribe la descripción del anuncio"
           />
 
-          <div className="flex items-center gap-4 mt-3">
+          <div className="flex flex-col gap-1 mt-3">
+            <label
+              className="block font-semibold text-white"
+              htmlFor={`file-${ad.id}`}
+            >
+              Subir imagen
+            </label>
             <input
+              id={`file-${ad.id}`}
               type="file"
               accept="image/*"
               onChange={(e) => handleFileUpload(e, ad.id)}
