@@ -2,31 +2,25 @@
 
 import { useState, useEffect } from "react";
 
-export default function AdvertisingView() {
-  const [advertisements, setAdvertisements] = useState([]);
+export default function AdvertisingView({ ads }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    fetch("/api/advertisements", { cache: "no-store" })
-      .then((res) => res.json())
-      .then((data) => setAdvertisements(data))
-      .catch(() => setAdvertisements([]));
-  }, []);
+    if (!ads || ads.length === 0) return;
 
-  useEffect(() => {
-    if (advertisements.length === 0) return;
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % advertisements.length);
+        setCurrentIndex((prev) => (prev + 1) % ads.length);
         setIsTransitioning(false);
       }, 300);
     }, 5000);
-    return () => clearInterval(interval);
-  }, [advertisements]);
 
-  const currentAd = advertisements[currentIndex];
+    return () => clearInterval(interval);
+  }, [ads]);
+
+  const currentAd = ads[currentIndex];
   if (!currentAd) return null;
 
   return (
@@ -79,7 +73,7 @@ export default function AdvertisingView() {
         <div
           className="h-full bg-accent shadow-lg shadow-accent/50 transition-all duration-500 ease-out"
           style={{
-            width: `${((currentIndex + 1) / advertisements.length) * 100}%`,
+            width: `${((currentIndex + 1) / ads.length) * 100}%`,
           }}
         />
       </div>
