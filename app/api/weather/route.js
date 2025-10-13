@@ -5,7 +5,8 @@ let callsThisMinute = 0;
 let lastReset = Date.now();
 
 const MAX_CALLS_PER_MIN = 60;
-const CACHE_TTL = 10 * 60 * 1000; // 10 min
+// const CACHE_TTL = 10 * 60 * 1000; // 10 min
+const CACHE_TTL = 30 * 1000; // 30 segundos
 
 export async function GET(req) {
   const { searchParams } = req.nextUrl;
@@ -16,19 +17,22 @@ export async function GET(req) {
 
   const now = Date.now();
 
+  // Reinicia el contador cada minuto
   if (now - lastReset > 60 * 1000) {
     callsThisMinute = 0;
     lastReset = now;
   }
 
-  // Fallback: si hay cache reciente, devolvemos eso aunque la API falle
   const cached = weatherCache[city];
-  if (cached && now - cached.timestamp < CACHE_TTL) {
+  const isCacheFresh = cached && now - cached.timestamp < CACHE_TTL;
+
+  // Si cache es válido y aún no toca refrescar, úsalo
+  if (isCacheFresh) {
     return NextResponse.json({ weather: cached.weather, temp: cached.temp });
   }
 
+  // Si superamos el límite de llamadas, usamos cache o fallback
   if (callsThisMinute >= MAX_CALLS_PER_MIN) {
-    // Si excede rate limit, devolvemos fallback
     if (cached)
       return NextResponse.json({ weather: cached.weather, temp: cached.temp });
     return NextResponse.json({ weather: "sunny", temp: "--" });
@@ -62,9 +66,9 @@ export async function GET(req) {
   } catch (err) {
     console.error("Weather fetch failed:", err);
 
-    // fallback: cache o valor por defecto
+    // Si falla la API, usamos el cache si existe
     if (cached)
       return NextResponse.json({ weather: cached.weather, temp: cached.temp });
-    return NextResponse.json({ weather: "sunny", temp: "--" });
+    return NextResponse.json({ weather: "sunny", temp: "" });
   }
 }

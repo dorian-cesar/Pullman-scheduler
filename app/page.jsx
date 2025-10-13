@@ -1,4 +1,3 @@
-// Home.js
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -82,11 +81,9 @@ export default function Home() {
 
   // Actualizar departures con clima de ciudad
   const updateDeparturesWithWeather = (city, weatherData) => {
-    setDeparturesData((prev) => {
-      return prev.map((d) =>
-        d.destination === city ? { ...d, ...weatherData } : d
-      );
-    });
+    setDeparturesData((prev) =>
+      prev.map((d) => (d.destination === city ? { ...d, ...weatherData } : d))
+    );
   };
 
   // Alternancia publicidad / board
@@ -96,12 +93,10 @@ export default function Home() {
     if (showAdvertising) {
       // Mientras publicidad, fetch departures
       fetchDepartures();
-
       timeout = setTimeout(() => setShowAdvertising(false), SLIDESHOW_DURATION);
     } else {
       // Mientras board, fetch ads
       fetchAds();
-
       timeout = setTimeout(() => setShowAdvertising(true), BOARD_DURATION);
     }
 
@@ -111,6 +106,21 @@ export default function Home() {
   // Fetch inicial de publicidad
   useEffect(() => {
     fetchAds();
+  }, []);
+
+  // Refrescar clima cada cierto tiempo
+  useEffect(() => {
+    const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutos
+
+    const interval = setInterval(() => {
+      console.log("Refrescando clima...");
+      weatherCache.current = {}; // limpia cache local
+      if (lastDeparturesRef.current.length > 0) {
+        fetchWeatherForDepartures(lastDeparturesRef.current);
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
