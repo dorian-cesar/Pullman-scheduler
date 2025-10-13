@@ -1,6 +1,7 @@
+// Home.js
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import DepartureBoard from "@/components/departure-board";
 import AdvertisingView from "@/components/advertising-view";
 
@@ -9,19 +10,30 @@ export default function Home() {
   const [departuresData, setDeparturesData] = useState([]);
   const [adsData, setAdsData] = useState([]);
 
-  const SLIDESHOW_DURATION = 3 * 5000; // 3 slides * 5s
-  const BOARD_DURATION = 35000; // duración del board en ms
+  const SLIDESHOW_DURATION = 3 * 5000;
+  const BOARD_DURATION = 35000;
 
+  // Cache persistente
+  const weatherCache = useRef({});
+
+  // Último departures recibido
+  const lastDeparturesRef = useRef([]);
+
+  // Fetch departures
   const fetchDepartures = async () => {
     try {
       const res = await fetch("/api/departures");
       const data = await res.json();
       setDeparturesData(data);
+      lastDeparturesRef.current = data;
+
+      fetchWeatherForDepartures(data);
     } catch (err) {
       console.error("Error fetch departures:", err);
     }
   };
 
+  // Fetch ads
   const fetchAds = async () => {
     try {
       const res = await fetch("/api/advertisements", { cache: "no-store" });
@@ -33,38 +45,84 @@ export default function Home() {
     }
   };
 
-  // Efecto para manejar cambios de slide y fetch correspondientes
+  // Fetch weather
+  const fetchWeatherForDepartures = async (departures) => {
+    const delayPerCall = 1100;
+    const uniqueCities = [...new Set(departures.map((d) => d.destination))];
+
+    for (let city of uniqueCities) {
+      // si está cacheada, usar cache y continuar
+      if (weatherCache.current[city]) {
+        updateDeparturesWithWeather(city, weatherCache.current[city]);
+        continue;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/weather?city=${encodeURIComponent(city)}`
+        );
+        const data = await res.json();
+
+        const weatherData = {
+          weather: data.weather || "sunny",
+          temp: data.temp ?? "--",
+        };
+
+        weatherCache.current[city] = weatherData;
+        updateDeparturesWithWeather(city, weatherData);
+      } catch {
+        const fallback = { weather: "sunny", temp: "--" };
+        weatherCache.current[city] = fallback;
+        updateDeparturesWithWeather(city, fallback);
+      }
+
+      await new Promise((res) => setTimeout(res, delayPerCall));
+    }
+  };
+
+  // Actualizar departures con clima de ciudad
+  const updateDeparturesWithWeather = (city, weatherData) => {
+    setDeparturesData((prev) => {
+      return prev.map((d) =>
+        d.destination === city ? { ...d, ...weatherData } : d
+      );
+    });
+  };
+
+  // Alternancia publicidad / board
   useEffect(() => {
     let timeout;
 
     if (showAdvertising) {
-      // Si estamos mostrando publicidad, cargamos departures
+      // Mientras publicidad, fetch departures
       fetchDepartures();
 
-      timeout = setTimeout(() => {
-        setShowAdvertising(false); // pasamos al board
-      }, SLIDESHOW_DURATION);
+      timeout = setTimeout(() => setShowAdvertising(false), SLIDESHOW_DURATION);
     } else {
-      // Si estamos mostrando board, cargamos anuncios
+      // Mientras board, fetch ads
       fetchAds();
 
-      timeout = setTimeout(() => {
-        setShowAdvertising(true); // volvemos a publicidad
-      }, BOARD_DURATION);
+      timeout = setTimeout(() => setShowAdvertising(true), BOARD_DURATION);
     }
 
     return () => clearTimeout(timeout);
   }, [showAdvertising]);
 
-  // Fetch inicial de advertisements al cargar la app por primera vez
+  // Fetch inicial de publicidad
   useEffect(() => {
     fetchAds();
   }, []);
 
   return (
     <main className="min-h-screen relative">
-      {!showAdvertising && <DepartureBoard departures={departuresData} />}
-      {showAdvertising && <AdvertisingView ads={adsData} />}
+      {showAdvertising ? (
+        <AdvertisingView ads={adsData} />
+      ) : (
+        <DepartureBoard
+          departures={departuresData}
+          weatherCache={weatherCache}
+        />
+      )}
     </main>
   );
 }
