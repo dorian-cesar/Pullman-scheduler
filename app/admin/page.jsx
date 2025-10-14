@@ -196,7 +196,7 @@ export default function AdminPage() {
 
           {/* BOTÓN DE VOLVER */}
           <button
-            onClick={() => window.history.back()}
+            onClick={() => router.push("/")}
             className="mt-4 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded w-full"
           >
             Volver
@@ -348,7 +348,7 @@ export default function AdminPage() {
           Guardar cambios
         </button>
         <button
-          onClick={() => window.history.back()}
+          onClick={() => router.push("/")}
           className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
         >
           Volver
