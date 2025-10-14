@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { Eye, EyeOff } from "lucide-react";
+import Select from "react-select";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -12,6 +13,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
 
   const showToast = (message, icon = "info") => {
     Swal.fire({
@@ -34,31 +38,76 @@ export default function AdminPage() {
     }
   };
 
-  // CARGAR ADS
+  // CARGAR CIUDADES Y ANUNCIOS
   useEffect(() => {
     if (!loggedIn) return;
 
-    const fetchAds = async () => {
+    const fetchData = async () => {
       try {
-        setLoadingMessage("Cargando anuncios…");
+        setLoadingMessage("Cargando ciudades y anuncios…");
         setLoading(true);
 
-        const res = await fetch("/api/advertisements", { cache: "no-store" });
-        const data = await res.json();
+        // Traer anuncios
+        const adsRes = await fetch("/api/advertisements", {
+          cache: "no-store",
+        });
+        const adsData = await adsRes.json();
+        setAds(Array.isArray(adsData) ? adsData : []);
 
-        if (Array.isArray(data)) setAds(data);
-        else setAds([]);
-      } catch {
-        setAds([]);
-        showToast("No se pudieron cargar los anuncios", "error");
+        // Traer ciudades
+        const citiesRes = await fetch("/api/cities", { cache: "no-store" });
+        const citiesData = await citiesRes.json();
+        setCities(
+          citiesData.cities.map((c) => ({ value: c.id, label: c.name }))
+        );
+      } catch (err) {
+        showToast("No se pudieron cargar los datos", "error");
       } finally {
         setLoading(false);
         setLoadingMessage("");
       }
     };
 
-    fetchAds();
+    fetchData();
   }, [loggedIn]);
+
+  // GUARDAR ADS Y CIUDAD
+  const handleSave = async () => {
+    setLoadingMessage("Guardando cambios…");
+    setLoading(true);
+
+    let cityMsg = "";
+    if (selectedCity) {
+      localStorage.setItem("selectedCity", JSON.stringify(selectedCity));
+      cityMsg = `Ciudad ${selectedCity.label} guardada.`;
+    }
+
+    let adsMsg = "";
+    try {
+      const res = await fetch("/api/advertisements", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ads),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        adsMsg = "Datos de anuncios guardados correctamente.";
+        console.log("URL JSON:", json.url);
+      } else {
+        adsMsg = json.error || "Error guardando datos de anuncios";
+      }
+    } catch {
+      adsMsg = "Error guardando datos de anuncios";
+    } finally {
+      setLoading(false);
+      setLoadingMessage("");
+    }
+
+    // Mostrar un solo toast con todo
+    if (cityMsg || adsMsg) {
+      showToast(`${cityMsg} ${adsMsg}`.trim(), "success");
+    }
+  };
 
   // SUBIR IMAGEN
   const handleFileUpload = async (e, adId) => {
@@ -94,33 +143,6 @@ export default function AdminPage() {
       setLoading(false);
       setLoadingMessage("");
       e.target.value = "";
-    }
-  };
-
-  // GUARDAR ADS
-  const handleSave = async () => {
-    try {
-      setLoadingMessage("Guardando datos de anuncios…");
-      setLoading(true);
-
-      const res = await fetch("/api/advertisements", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ads),
-      });
-
-      const json = await res.json();
-      if (res.ok) {
-        showToast("Datos de anuncios guardados correctamente", "success");
-        console.log("URL JSON:", json.url);
-      } else {
-        showToast(json.error || "Error guardando datos de anuncios", "error");
-      }
-    } catch {
-      showToast("Error guardando datos de anuncios", "error");
-    } finally {
-      setLoading(false);
-      setLoadingMessage("");
     }
   };
 
@@ -191,6 +213,45 @@ export default function AdminPage() {
         Mantenedor de Publicidad - Tablero Pullman
       </h1>
 
+      {/* SELECT DE CIUDADES */}
+      <div className="mb-6 w-80">
+        <label className="block mb-2 font-semibold text-white">
+          Ciudad de origen
+        </label>
+        <Select
+          options={cities}
+          value={selectedCity}
+          onChange={(city) => setSelectedCity(city)}
+          placeholder="Escribe o selecciona una ciudad"
+          isClearable
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              backgroundColor: "white",
+              color: "black",
+            }),
+            singleValue: (provided) => ({
+              ...provided,
+              color: "black",
+            }),
+            menu: (provided) => ({
+              ...provided,
+              backgroundColor: "white",
+              color: "black",
+            }),
+            option: (provided, state) => ({
+              ...provided,
+              backgroundColor: state.isFocused ? "#e2e8f0" : "white",
+              color: "black",
+            }),
+            placeholder: (provided) => ({
+              ...provided,
+              color: "gray",
+            }),
+          }}
+        />
+      </div>
+
       {ads.map((ad) => (
         <div key={ad.id} className="bg-gray-800 p-4 mb-6 rounded-lg">
           <h2 className="text-xl mb-2">Anuncio {ad.id}</h2>
@@ -214,7 +275,6 @@ export default function AdminPage() {
             )}
           </div>
 
-          {/* INPUT TÍTULO */}
           <label
             className="block mb-1 font-semibold text-white"
             htmlFor={`title-${ad.id}`}
@@ -235,7 +295,6 @@ export default function AdminPage() {
             placeholder="Escribe el título del anuncio"
           />
 
-          {/* INPUT DESCRIPCIÓN */}
           <label
             className="block mb-1 font-semibold text-white"
             htmlFor={`description-${ad.id}`}
