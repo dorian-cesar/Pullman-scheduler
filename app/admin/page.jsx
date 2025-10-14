@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { Eye, EyeOff } from "lucide-react";
 import Select from "react-select";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -13,9 +14,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
+  const router = useRouter();
 
   const showToast = (message, icon = "info") => {
     Swal.fire({
