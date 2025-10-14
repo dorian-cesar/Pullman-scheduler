@@ -18,7 +18,11 @@ export default function Home() {
   // Fetch departures
   const fetchDepartures = async () => {
     try {
-      const res = await fetch("/api/departures");
+      // Leer ciudad desde localStorage
+      const storedCity = localStorage.getItem("selectedCity");
+      const originId = storedCity ? JSON.parse(storedCity).value : 1646;
+
+      const res = await fetch(`/api/departures?originId=${originId}`);
       const data = await res.json();
       setDeparturesData(data);
       lastDeparturesRef.current = data;

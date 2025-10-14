@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
 
 const KUPOS_API_KEY = process.env.KUPOS_API_KEY;
-const ORIGIN_ID = 1646; // Santiago
 
 // Lista de IDs de ciudades permitidas
 const allowedCityIds = [
@@ -23,8 +22,12 @@ const allowedCityIds = [
   1986, // Rancagua
 ];
 
-export async function GET() {
+export async function GET(req) {
   try {
+    // Obtener originId desde query params, fallback 1646
+    const url = new URL(req.url);
+    const originId = url.searchParams.get("originId") || "1646";
+
     const citiesRes = await fetch(
       `https://gds.kupos.com/gds/api/cities.json?api_key=${KUPOS_API_KEY}`
     );
@@ -37,6 +40,7 @@ export async function GET() {
       });
     }
 
+    // Todas las ciudades, filtrando solo las permitidas
     const cities = citiesData.result
       .slice(1)
       .filter((c) => allowedCityIds.includes(c[0]));
@@ -45,7 +49,7 @@ export async function GET() {
 
     // Hora actual en Chile
     const now = DateTime.now().setZone("America/Santiago");
-    const scheduleLimit = now.plus({ hours: 1.5 }); // +1h30
+    // const scheduleLimit = now.plus({ hours: 1.5 }); // +1h30
 
     for (const c of cities) {
       const cityName = c[1];
@@ -53,13 +57,12 @@ export async function GET() {
 
       try {
         const scheduleRes = await fetch(
-          `https://gds.kupos.com/gds/api/ui_schedules/${ORIGIN_ID}/${cityId}/${now.toISODate()}.json?api_key=${KUPOS_API_KEY}`
+          `https://gds.kupos.com/gds/api/ui_schedules/${originId}/${cityId}/${now.toISODate()}.json?api_key=${KUPOS_API_KEY}`
         );
         const scheduleData = await scheduleRes.json();
 
         if (!scheduleData.result || scheduleData.result.length <= 1) continue;
 
-        let count = 0;
         for (let i = 1; i < scheduleData.result.length; i++) {
           const s = scheduleData.result[i];
 
@@ -69,7 +72,7 @@ export async function GET() {
           const depTime = now.set({ hour, minute, second: 0, millisecond: 0 });
 
           // Filtro: solo servicios dentro del rango de 1h30 desde ahora
-          if (depTime < now || depTime > scheduleLimit) continue;
+          // if (depTime < now || depTime > scheduleLimit) continue;
 
           const service = s[15] ? s[15].split(":")[0] : "EJECUTIVO";
 
@@ -77,15 +80,12 @@ export async function GET() {
           const status = diffMinutes <= 20 ? "LLEGANDO" : "A TIEMPO";
 
           departures.push({
-            id: `${cityId}-${count}`,
+            id: `${cityId}-${i}`, // usamos i como contador único
             destination: cityName,
             time: s[9] || "Sin servicios",
             service,
             status,
           });
-
-          count++;
-          if (count >= 3) break;
         }
       } catch (err) {
         console.error(`Error fetching schedule for ${cityName}:`, err);

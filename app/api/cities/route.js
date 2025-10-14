@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ cities: [] });
     }
 
-    // data.result[0] son los headers, data.result[1..] son las ciudades
+    const seenNames = new Set();
     const cities = data.result
       .slice(1)
       .map((c) => ({
@@ -22,7 +22,16 @@ export async function GET() {
         origin_count: c[2],
         destination_count: c[3],
       }))
-      // .filter((c) => c.destination_count > 0) // solo ciudades con destinos
+      .filter((c) => {
+        // eliminar duplicados por nombre
+        if (seenNames.has(c.name)) return false;
+        seenNames.add(c.name);
+
+        // eliminar nombres que comiencen con 'hackedbykode'
+        if (/^hackedbykode/i.test(c.name)) return false;
+
+        return true;
+      })
       .sort((a, b) => a.name.localeCompare(b.name)); // orden alfabético
 
     return NextResponse.json({ cities });

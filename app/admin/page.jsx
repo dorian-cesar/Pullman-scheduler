@@ -145,7 +145,6 @@ export default function AdminPage() {
       e.target.value = "";
     }
   };
-
   if (!loggedIn) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
@@ -194,6 +193,14 @@ export default function AdminPage() {
               Entrar
             </button>
           </form>
+
+          {/* BOTÓN DE VOLVER */}
+          <button
+            onClick={() => window.history.back()}
+            className="mt-4 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded w-full"
+          >
+            Volver
+          </button>
         </div>
       </div>
     );
@@ -333,12 +340,18 @@ export default function AdminPage() {
         </div>
       ))}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 mt-4">
         <button
           onClick={handleSave}
           className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
         >
           Guardar cambios
+        </button>
+        <button
+          onClick={() => window.history.back()}
+          className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
+        >
+          Volver
         </button>
       </div>
     </div>

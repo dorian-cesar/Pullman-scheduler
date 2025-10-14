@@ -46,7 +46,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
 
       // Cleanup
       return () => cancelAnimationFrame(frameId);
-    }, 5000);
+    }, 4000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -121,38 +121,44 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
           </div>
 
           <div ref={scrollRef} className="flex-grow overflow-hidden relative">
-            {departures.map((d) => (
-              <div
-                key={d.id}
-                className="grid grid-cols-12 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
-                style={{ height: `${rowHeight}px` }}
-              >
-                <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
-                  {d.destination}
-                </div>
-                <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-widest">
-                  {d.time}
-                </div>
-                <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
-                  {d.service}
-                </div>
-                <div className="col-span-3">
-                  <span
-                    className={`inline-flex items-center px-3 py-2 border-2 rounded text-sm font-bold font-mono uppercase tracking-wide ${
-                      d.status === "A TIEMPO"
-                        ? "text-green-400 border-green-400/50 bg-green-400/10"
-                        : d.status === "LLEGANDO"
-                        ? "text-blue-300 border-blue-300/50 bg-blue-300/10 animate-pulse"
-                        : d.status === "RETRASADO"
-                        ? "text-red-400 border-red-400/50 bg-red-400/10"
-                        : "text-blue-400 border-blue-400/50 bg-blue-400/10"
-                    }`}
-                  >
-                    {d.status}
-                  </span>
-                </div>
+            {departures.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-white text-3xl font-bold font-mono tracking-wider uppercase">
+                No hay servicios disponibles
               </div>
-            ))}
+            ) : (
+              departures.map((d) => (
+                <div
+                  key={d.id}
+                  className="grid grid-cols-12 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
+                  style={{ height: `${rowHeight}px` }}
+                >
+                  <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
+                    {d.destination}
+                  </div>
+                  <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-widest">
+                    {d.time}
+                  </div>
+                  <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
+                    {d.service}
+                  </div>
+                  <div className="col-span-3">
+                    <span
+                      className={`inline-flex items-center px-3 py-2 border-2 rounded text-sm font-bold font-mono uppercase tracking-wide ${
+                        d.status === "A TIEMPO"
+                          ? "text-green-400 border-green-400/50 bg-green-400/10"
+                          : d.status === "LLEGANDO"
+                          ? "text-blue-300 border-blue-300/50 bg-blue-300/10 animate-pulse"
+                          : d.status === "RETRASADO"
+                          ? "text-red-400 border-red-400/50 bg-red-400/10"
+                          : "text-blue-400 border-blue-400/50 bg-blue-400/10"
+                      }`}
+                    >
+                      {d.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
