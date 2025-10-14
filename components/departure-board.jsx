@@ -8,6 +8,7 @@ import info from "../info.json";
 export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [updatedDepartures, setUpdatedDepartures] = useState([]);
+  const [currentCity, setCurrentCity] = useState("SANTIAGO");
   const scrollRef = useRef(null);
   const rowHeight = 85;
   const isVisible = useFadeIn();
@@ -16,6 +17,20 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const storedCity = localStorage.getItem("selectedCity");
+    if (storedCity) {
+      try {
+        const cityObj = JSON.parse(storedCity);
+        if (cityObj.label) {
+          setCurrentCity(cityObj.label.toUpperCase());
+        }
+      } catch (e) {
+        console.error("Error parsing selectedCity from localStorage:", e);
+      }
+    }
   }, []);
 
   // Scroll infinito
@@ -68,7 +83,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
             />
             <div className="h-8 w-px bg-white/20" />
             <h1 className="text-2xl font-bold text-white tracking-wider uppercase font-mono pt-1">
-              {info.sitio}
+              {currentCity}
             </h1>
           </div>
           <div className="flex items-center gap-4 text-white">
@@ -105,7 +120,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
             </h2>
           </div>
 
-          <div className="grid grid-cols-12 gap-3 px-4 py-3 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2 flex-shrink-0">
+          <div className="grid grid-cols-13 gap-3 px-4 py-3 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2 flex-shrink-0">
             <div className="col-span-4 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
               Destino
             </div>
@@ -118,6 +133,9 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
             <div className="col-span-3 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
               Estado
             </div>
+            <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+              Terminal
+            </div>
           </div>
 
           <div ref={scrollRef} className="flex-grow overflow-hidden relative">
@@ -129,7 +147,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
               departures.map((d) => (
                 <div
                   key={d.id}
-                  className="grid grid-cols-12 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
+                  className="grid grid-cols-13 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
                   style={{ height: `${rowHeight}px` }}
                 >
                   <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
@@ -155,6 +173,9 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                     >
                       {d.status}
                     </span>
+                  </div>
+                  <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
+                    {d.terminal}
                   </div>
                 </div>
               ))

@@ -20,6 +20,7 @@ const allowedCityIds = [
   1725, // Concón
   1904, // Olmué
   1986, // Rancagua
+  1646, // Santiago
 ];
 
 export async function GET(req) {
@@ -71,20 +72,33 @@ export async function GET(req) {
           const [hour, minute] = s[9].split(":").map(Number);
           const depTime = now.set({ hour, minute, second: 0, millisecond: 0 });
 
-          // Filtro: solo servicios dentro del rango de 1h30 desde ahora
-          // if (depTime < now || depTime > scheduleLimit) continue;
-
+          // Extraer tipo de servicio
           const service = s[15] ? s[15].split(":")[0] : "EJECUTIVO";
 
+          // Estado según proximidad
           const diffMinutes = depTime.diff(now, "minutes").toObject().minutes;
           const status = diffMinutes <= 20 ? "LLEGANDO" : "A TIEMPO";
 
+          // Terminal de salida
+          let departureTerminal = "Desconocido";
+          if (s[22]) {
+            // boarding_stages
+            const stages = s[22].split(","); // separar cada stage
+            if (stages.length > 0) {
+              const firstStage = stages[0]; // primer stage
+              const stageParts = firstStage.split("|");
+              departureTerminal =
+                stageParts[stageParts.length - 1] || "Desconocido";
+            }
+          }
+
           departures.push({
-            id: `${cityId}-${i}`, // usamos i como contador único
+            id: `${cityId}-${i}`,
             destination: cityName,
             time: s[9] || "Sin servicios",
             service,
             status,
+            terminal: departureTerminal,
           });
         }
       } catch (err) {
