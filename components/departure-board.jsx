@@ -5,21 +5,21 @@ import { Bus, Clock, Sun, Cloud, CloudRain, CloudSun } from "lucide-react";
 import useFadeIn from "@/hooks/useFadeIn";
 import info from "../info.json";
 
-function WeatherIcon({ weather }) {
-  const iconClass = "h-7 w-7";
-  switch (weather) {
-    case "sunny":
-      return <Sun className={`${iconClass} text-yellow-400`} />;
-    case "cloudy":
-      return <Cloud className={`${iconClass} text-gray-400`} />;
-    case "rainy":
-      return <CloudRain className={`${iconClass} text-blue-400`} />;
-    case "partly-cloudy":
-      return <CloudSun className={`${iconClass} text-yellow-300`} />;
-    default:
-      return <Sun className={`${iconClass} text-yellow-400`} />;
-  }
-}
+// function WeatherIcon({ weather }) {
+//   const iconClass = "h-7 w-7";
+//   switch (weather) {
+//     case "sunny":
+//       return <Sun className={`${iconClass} text-yellow-400`} />;
+//     case "cloudy":
+//       return <Cloud className={`${iconClass} text-gray-400`} />;
+//     case "rainy":
+//       return <CloudRain className={`${iconClass} text-blue-400`} />;
+//     case "partly-cloudy":
+//       return <CloudSun className={`${iconClass} text-yellow-300`} />;
+//     default:
+//       return <Sun className={`${iconClass} text-yellow-400`} />;
+//   }
+// }
 
 export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -40,15 +40,15 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   }, [departures]);
 
   // Cuando llega el cache del clima, solo actualizamos los valores, sin bloquear
-  useEffect(() => {
-    if (!departures.length) return;
-    setUpdatedDepartures((prev) =>
-      prev.map((d) => ({
-        ...d,
-        ...(weatherCache[d.destination] || {}),
-      }))
-    );
-  }, [weatherCache]);
+  // useEffect(() => {
+  //   if (!departures.length) return;
+  //   setUpdatedDepartures((prev) =>
+  //     prev.map((d) => ({
+  //       ...d,
+  //       ...(weatherCache[d.destination] || {}),
+  //     }))
+  //   );
+  // }, [weatherCache]);
 
   // Reloj
   useEffect(() => {
@@ -147,9 +147,9 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
             <div className="col-span-4 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
               Destino
             </div>
-            <div className="col-span-1 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            {/* <div className="col-span-1 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
               Clima
-            </div>
+            </div> */}
             <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
               Hora
             </div>
@@ -171,12 +171,12 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                 <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
                   {d.destination}
                 </div>
-                <div className="col-span-1 flex items-center justify-start gap-1">
+                {/* <div className="col-span-1 flex items-center justify-start gap-1">
                   <WeatherIcon weather={d.weather} />
                   <span className="text-white/70 font-mono font-bold">
                     {d.temp}°
                   </span>
-                </div>
+                </div> */}
                 <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-widest">
                   {d.time}
                 </div>
