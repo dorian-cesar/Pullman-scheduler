@@ -21,6 +21,7 @@ const allowedCityIds = [
   1904, // Olmué
   1986, // Rancagua
   1646, // Santiago
+  1642, // Llay Llay
 ];
 
 export async function GET(req) {
