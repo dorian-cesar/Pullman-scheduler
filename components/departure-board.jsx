@@ -134,7 +134,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
               Estado
             </div>
             <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
-              Terminal
+              Salida
             </div>
           </div>
 

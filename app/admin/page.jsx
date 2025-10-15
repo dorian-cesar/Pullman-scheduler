@@ -217,9 +217,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      <h1 className="text-3xl font-bold mb-6">
-        Mantenedor de Publicidad - Tablero Pullman
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Mantenedor de Tablero Pullman</h1>
 
       {/* SELECT DE CIUDADES */}
       <div className="mb-6 w-80">
