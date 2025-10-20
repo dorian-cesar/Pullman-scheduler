@@ -10,7 +10,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const [updatedDepartures, setUpdatedDepartures] = useState([]);
   const [currentCity, setCurrentCity] = useState("SANTIAGO");
   const scrollRef = useRef(null);
-  const rowHeight = 85;
+  const rowHeight = 120;
   const isVisible = useFadeIn();
 
   // Reloj
@@ -82,21 +82,21 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
               className="h-8 w-auto brightness-110 pl-2"
             />
             <div className="h-8 w-px bg-white/20" />
-            <h1 className="text-2xl font-bold text-white tracking-wider uppercase font-mono pt-1">
+            <h1 className="text-5xl font-bold text-white tracking-wider uppercase font-mono pt-1">
               {currentCity}
             </h1>
           </div>
           <div className="flex items-center gap-4 text-white">
             <Clock className="h-6 w-6 text-white" />
             <div className="flex items-baseline gap-3">
-              <div className="text-4xl font-bold font-mono tracking-wider tabular-nums text-white">
+              <div className="text-5xl font-bold font-mono tracking-wider tabular-nums text-white">
                 {currentTime.toLocaleTimeString("es-CL", {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
                 })}
               </div>
-              <div className="text-lg opacity-90 uppercase tracking-wide">
+              <div className="text-3xl opacity-90 uppercase tracking-wide">
                 {currentTime.toLocaleDateString("es-CL", {
                   day: "2-digit",
                   month: "short",
@@ -121,47 +121,55 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
           </div>
 
           <div className="grid grid-cols-13 gap-3 px-4 py-3 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2 flex-shrink-0">
-            <div className="col-span-4 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            <div className="col-span-4 text-white/70 font-bold text-3xl uppercase tracking-widest font-mono">
               Destino
             </div>
-            <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            <div className="col-span-2 text-white/70 font-bold text-3xl uppercase tracking-widest font-mono">
               Hora
             </div>
-            <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            <div className="col-span-2 text-white/70 font-bold text-3xl uppercase tracking-widest font-mono">
               Servicio
             </div>
-            <div className="col-span-3 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            <div className="col-span-3 text-white/70 font-bold text-3xl uppercase tracking-widest font-mono">
               Estado
             </div>
-            <div className="col-span-2 text-white/70 font-bold text-lg uppercase tracking-widest font-mono">
+            <div className="col-span-2 text-white/70 font-bold text-3xl uppercase tracking-widest font-mono">
               Salida
             </div>
           </div>
 
+          {/* Filas */}
           <div ref={scrollRef} className="flex-grow overflow-hidden relative">
             {departures.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-white text-3xl font-bold font-mono tracking-wider uppercase">
+              <div className="flex items-center justify-center h-full text-white text-5xl font-bold font-mono tracking-wide uppercase">
                 No hay servicios disponibles
               </div>
             ) : (
               departures.map((d) => (
                 <div
                   key={d.id}
-                  className="grid grid-cols-13 gap-3 px-4 py-5 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
+                  className="grid grid-cols-13 gap-3 px-4 bg-[#0d1d35] border-2 border-[#2a3952] rounded-lg mb-2"
                   style={{ height: `${rowHeight}px` }}
                 >
-                  <div className="col-span-4 flex items-center text-white text-3xl font-bold font-mono tracking-wider uppercase">
+                  {/* Destino */}
+                  <div className="col-span-4 flex items-center text-white text-6xl font-bold font-mono tracking-wide uppercase leading-none">
                     {d.destination}
                   </div>
-                  <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-widest">
+
+                  {/* Hora */}
+                  <div className="col-span-2 flex items-center text-white text-6xl font-bold font-mono tracking-wide leading-none">
                     {d.time}
                   </div>
-                  <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
+
+                  {/* Servicio */}
+                  <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-wide uppercase leading-none">
                     {d.service}
                   </div>
-                  <div className="col-span-3">
+
+                  {/* Estado */}
+                  <div className="col-span-2 flex items-center">
                     <span
-                      className={`inline-flex items-center px-3 py-2 border-2 rounded text-sm font-bold font-mono uppercase tracking-wide ${
+                      className={`inline-flex items-center px-4 py-2 border-2 rounded text-2xl font-bold font-mono uppercase tracking-wide ${
                         d.status === "A TIEMPO"
                           ? "text-green-400 border-green-400/50 bg-green-400/10"
                           : d.status === "LLEGANDO"
@@ -174,7 +182,9 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                       {d.status}
                     </span>
                   </div>
-                  <div className="col-span-2 flex items-center text-white/80 text-xl font-mono tracking-wide uppercase">
+
+                  {/* Terminal / Salida */}
+                  <div className="col-span-3 flex items-center text-white text-4xl font-bold font-mono tracking-wide uppercase leading-none">
                     {d.terminal}
                   </div>
                 </div>
