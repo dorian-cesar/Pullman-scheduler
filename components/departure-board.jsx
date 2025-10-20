@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Bus, Clock, Sun, Cloud, CloudRain, CloudSun } from "lucide-react";
+import { Bus, Clock } from "lucide-react";
 import useFadeIn from "@/hooks/useFadeIn";
-import info from "../info.json";
 
 export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -184,7 +183,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                   </div>
 
                   {/* Terminal / Salida */}
-                  <div className="col-span-3 flex items-center text-white text-4xl font-bold font-mono tracking-wide uppercase leading-none">
+                  <div className="col-span-3 flex items-center h-full text-white text-4xl font-bold font-mono tracking-wide uppercase leading-none">
                     {d.terminal}
                   </div>
                 </div>
