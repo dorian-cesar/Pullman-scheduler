@@ -9,7 +9,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const [updatedDepartures, setUpdatedDepartures] = useState([]);
   const [currentCity, setCurrentCity] = useState("SANTIAGO");
   const scrollRef = useRef(null);
-  const rowHeight = 120;
+  const rowHeight = 125;
   const isVisible = useFadeIn();
 
   // Reloj
@@ -140,7 +140,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
           {/* Filas */}
           <div ref={scrollRef} className="flex-grow overflow-hidden relative">
             {departures.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-white text-5xl font-bold font-mono tracking-wide uppercase">
+              <div className="flex items-center justify-center h-full text-white text-4xl font-bold font-mono tracking-wide uppercase">
                 No hay servicios disponibles
               </div>
             ) : (
@@ -151,12 +151,12 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                   style={{ height: `${rowHeight}px` }}
                 >
                   {/* Destino */}
-                  <div className="col-span-4 flex items-center text-white text-6xl font-bold font-mono tracking-wide uppercase leading-none">
+                  <div className="col-span-4 flex items-center text-white text-4xl font-bold font-mono tracking-wide uppercase leading-none">
                     {d.destination}
                   </div>
 
                   {/* Hora */}
-                  <div className="col-span-2 flex items-center text-white text-6xl font-bold font-mono tracking-wide leading-none">
+                  <div className="col-span-2 flex items-center text-white text-4xl font-bold font-mono tracking-wide leading-none">
                     {d.time}
                   </div>
 
@@ -168,7 +168,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
                   {/* Estado */}
                   <div className="col-span-2 flex items-center">
                     <span
-                      className={`inline-flex items-center px-4 py-2 border-2 rounded text-2xl font-bold font-mono uppercase tracking-wide ${
+                      className={`inline-flex items-center px-4 py-2 border-2 rounded text-4xl font-bold font-mono uppercase tracking-wide ${
                         d.status === "A TIEMPO"
                           ? "text-green-400 border-green-400/50 bg-green-400/10"
                           : d.status === "LLEGANDO"
