@@ -81,14 +81,14 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
               className="h-8 w-auto brightness-110 pl-2"
             />
             <div className="h-8 w-px bg-white/20" />
-            <h1 className="text-5xl font-bold text-white tracking-wider uppercase font-mono pt-1">
+            <h1 className="text-4xl font-bold text-white tracking-wider uppercase font-mono pt-1">
               {currentCity}
             </h1>
           </div>
           <div className="flex items-center gap-4 text-white">
             <Clock className="h-6 w-6 text-white" />
             <div className="flex items-baseline gap-3">
-              <div className="text-5xl font-bold font-mono tracking-wider tabular-nums text-white">
+              <div className="text-4xl font-bold font-mono tracking-wider tabular-nums text-white">
                 {currentTime.toLocaleTimeString("es-CL", {
                   hour: "2-digit",
                   minute: "2-digit",
