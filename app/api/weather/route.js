@@ -40,7 +40,7 @@ export async function GET(req) {
 
   callsThisMinute++;
 
-  const apiKey = process.env.OPENWEATHER_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_KEY;
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
     city
   )}&units=metric&lang=es&appid=${apiKey}`;

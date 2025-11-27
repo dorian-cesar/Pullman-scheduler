@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-const KUPOS_API_KEY = process.env.NEXT_PUBLIC_KUPOS_API_KEY;
+const NEXT_PUBLIC_KUPOS_API_KEY = process.env.NEXT_PUBLIC_KUPOS_API_KEY;
 
 export async function GET() {
   try {
     const res = await fetch(
-      `https://gds.kupos.com/gds/api/cities.json?api_key=${KUPOS_API_KEY}`
+      `https://gds.kupos.com/gds/api/cities.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`
     );
     const data = await res.json();
 

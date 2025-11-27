@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-const KUPOS_API_KEY = process.env.KUPOS_API_KEY;
+const NEXT_PUBLIC_KUPOS_API_KEY = process.env.NEXT_PUBLIC_KUPOS_API_KEY;
 
 // Lista de IDs de ciudades permitidas
 const allowedCityIds = [
@@ -31,7 +31,7 @@ export async function GET(req) {
     const originId = url.searchParams.get("originId") || "1646";
 
     const citiesRes = await fetch(
-      `https://gds.kupos.com/gds/api/cities.json?api_key=${KUPOS_API_KEY}`
+      `https://gds.kupos.com/gds/api/cities.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`
     );
     const citiesData = await citiesRes.json();
 
@@ -59,7 +59,7 @@ export async function GET(req) {
 
       try {
         const scheduleRes = await fetch(
-          `https://gds.kupos.com/gds/api/ui_schedules/${originId}/${cityId}/${now.toISODate()}.json?api_key=${KUPOS_API_KEY}`
+          `https://gds.kupos.com/gds/api/ui_schedules/${originId}/${cityId}/${now.toISODate()}.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`
         );
         const scheduleData = await scheduleRes.json();
 
