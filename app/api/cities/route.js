@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const KUPOS_API_KEY = process.env.KUPOS_API_KEY;
+const KUPOS_API_KEY = process.env.NEXT_PUBLIC_KUPOS_API_KEY;
 
 export async function GET() {
   try {
