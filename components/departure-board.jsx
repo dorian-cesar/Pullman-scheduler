@@ -12,7 +12,7 @@ export default function DepartureBoard({ departures = [], weatherCache = {} }) {
   const rowHeight = 125;
   const isVisible = useFadeIn();
 
-  // Reloj
+  // Reloj Digital
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
