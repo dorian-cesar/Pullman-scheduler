@@ -1,68 +1,57 @@
-import { v2 as cloudinary } from "cloudinary";
+import { promises as fs } from "fs";
+import path from "path";
 import { NextResponse } from "next/server";
-
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-  api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
-});
 
 export const runtime = "nodejs";
 
-const JSON_PUBLIC_ID = "mantenedor/advertisements.json";
+const DATA_FILE_PATH = path.join(process.cwd(), "data", "advertisements.json");
 
-// GET: Leer JSON
+// Helper para leer el archivo JSON
+async function readData() {
+  try {
+    const fileContent = await fs.readFile(DATA_FILE_PATH, "utf-8");
+    return JSON.parse(fileContent);
+  } catch (error) {
+    // Si el archivo no existe, retornar array vacío
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+}
+
+// Helper para guardar en el archivo JSON
+async function saveData(data) {
+  await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
+}
+
+// GET: Leer JSON local
 export async function GET() {
   try {
-    const result = await cloudinary.api.resource(JSON_PUBLIC_ID, {
-      resource_type: "raw",
-    });
-
-    // result.secure_url tiene la versión más reciente
-    const res = await fetch(result.secure_url);
-    const data = await res.json();
-
+    const data = await readData();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error cargando JSON:", error);
+    console.error("Error cargando JSON local:", error);
     return NextResponse.json(
-      { error: "No se pudo cargar JSON" },
+      { error: "No se pudo cargar JSON local" },
       { status: 500 }
     );
   }
 }
 
-// PUT: Sobreescribir JSON
+// PUT: Sobreescribir JSON local
 export async function PUT(req) {
   try {
     const data = await req.json();
-    const jsonString = JSON.stringify(data, null, 2);
-
-    const uploaded = await new Promise((resolve, reject) => {
-      const buffer = Buffer.from(jsonString, "utf-8");
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: "mantenedor",
-          public_id: "advertisements.json",
-          resource_type: "raw",
-          overwrite: true,
-        },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      stream.end(buffer);
-    });
+    await saveData(data);
 
     return NextResponse.json({
-      message: "JSON actualizado correctamente",
-      url: uploaded.secure_url, // URL del JSON actualizado
+      message: "JSON actualizado correctamente en local",
     });
   } catch (error) {
-    console.error("Error guardando JSON:", error);
+    console.error("Error guardando JSON local:", error);
     return NextResponse.json(
-      { error: "No se pudo actualizar JSON" },
+      { error: "No se pudo actualizar JSON local" },
       { status: 500 }
     );
   }

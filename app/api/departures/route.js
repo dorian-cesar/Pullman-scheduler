@@ -30,12 +30,16 @@ export async function GET(req) {
     const url = new URL(req.url);
     const originId = url.searchParams.get("originId") || "1646";
 
+    console.log(`[API] Fetching departures for originId: ${originId}`);
+    console.log(`[API] API Key Present: ${!!NEXT_PUBLIC_KUPOS_API_KEY}`);
+
     const citiesRes = await fetch(
       `https://gds.kupos.com/gds/api/cities.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`
     );
     const citiesData = await citiesRes.json();
 
     if (!citiesData.result) {
+      console.warn("[API] No cities found in API response");
       return new Response(JSON.stringify([]), {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -47,37 +51,53 @@ export async function GET(req) {
       .slice(1)
       .filter((c) => allowedCityIds.includes(c[0]));
 
+    console.log(`[API] Found ${cities.length} allowed destinations`);
+
     const departures = [];
 
     // Hora actual en Chile
     const now = DateTime.now().setZone("America/Santiago");
-    // const scheduleLimit = now.plus({ hours: 1.5 }); // +1h30
+    console.log(`[API] Current time in Santiago: ${now.toISODate()} ${now.toFormat("HH:mm")}`);
 
     for (const c of cities) {
       const cityName = c[1];
       const cityId = c[0];
 
       try {
-        const scheduleRes = await fetch(
-          `https://gds.kupos.com/gds/api/ui_schedules/${originId}/${cityId}/${now.toISODate()}.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`
-        );
+        const scheduleUrl = `https://gds.kupos.com/gds/api/ui_schedules/${originId}/${cityId}/${now.toISODate()}.json?api_key=${NEXT_PUBLIC_KUPOS_API_KEY}`;
+        // console.log(`[API] Fetching schedule for ${cityName} (${cityId}): ${scheduleUrl}`);
+
+        const scheduleRes = await fetch(scheduleUrl);
         const scheduleData = await scheduleRes.json();
 
-        if (!scheduleData.result || scheduleData.result.length <= 1) continue;
+        if (!scheduleData.result || scheduleData.result.length <= 1) {
+          // console.log(`[API] No schedules for ${cityName}`);
+          continue;
+        }
 
+        let addedCount = 0;
         for (let i = 1; i < scheduleData.result.length; i++) {
           const s = scheduleData.result[i];
 
+          // Filtrar operador "Pullman Costa"
+          // console.log(`[API] Checking service: ${s[47]}`);
           if (s[47] !== "Pullman Costa") continue;
 
           const [hour, minute] = s[9].split(":").map(Number);
           const depTime = now.set({ hour, minute, second: 0, millisecond: 0 });
+
+          // Filtrar pasados? El código original no filtraba pasados explícitamente, pero calculaba status.
+          // Añadamos log si es viejo.
 
           // Extraer tipo de servicio
           const service = s[15] ? s[15].split(":")[0] : "EJECUTIVO";
 
           // Estado según proximidad
           const diffMinutes = depTime.diff(now, "minutes").toObject().minutes;
+
+          // Si el bus ya salió hace mucho, quizás no deberíamos mostrarlo?
+          // El código original mostraba todo lo del día.
+
           const status = diffMinutes <= 20 ? "LLEGANDO" : "A TIEMPO";
 
           // Terminal de salida
@@ -101,11 +121,18 @@ export async function GET(req) {
             status,
             terminal: departureTerminal,
           });
+          addedCount++;
         }
+        if (addedCount > 0) {
+          console.log(`[API] Added ${addedCount} departures for ${cityName}`);
+        }
+
       } catch (err) {
         console.error(`Error fetching schedule for ${cityName}:`, err);
       }
     }
+
+    console.log(`[API] Total departures found: ${departures.length}`);
 
     // Ordenar por hora de salida real
     departures.sort((a, b) => {
