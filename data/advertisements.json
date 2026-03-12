@@ -8,6 +8,14 @@
         "duration": 5000
     },
     {
+        "id": 2,
+        "title": "Máxima Comodidad",
+        "description": "Asientos semi-cama y salón cama para su descanso.",
+        "type": "image",
+        "content": "/ads/foto3.jpg",
+        "duration": 5000
+    },
+    {
         "id": 3,
         "title": "Máxima Comodidad",
         "description": "Asientos semi-cama y salón cama para su descanso.",
