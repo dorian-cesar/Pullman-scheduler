@@ -31,8 +31,8 @@ export async function POST(req) {
     // que haga un imagesStore.get(fileName) y devuelva el stream.
 
     return NextResponse.json({
-      message: "Imagen guardada permanentemente en Netlify Blobs",
-      file: `/api/ads/${fileName}`, // Esta sería tu nueva ruta de lectura
+      message: "Imagen guardada",
+  file: `/api/ads/${fileName}?t=${Date.now()}`, // Ahora apunta a la API, no a /public
     });
   } catch (error) {
     console.error("Error en Blobs:", error);
